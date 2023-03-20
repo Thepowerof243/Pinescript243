@@ -1,0 +1,64 @@
+//@version=4
+study("Algo Trading System", shorttitle="ATS", overlay=true)
+
+// Define Goldbach levels
+goldbach_0 = 100
+goldbach_1 = 97
+goldbach_2 = 89
+goldbach_3 = 83
+goldbach_4 = 71
+goldbach_5 = 59
+goldbach_6 = 53
+goldbach_7 = 47
+goldbach_8 = 41
+goldbach_9 = 29
+goldbach_10 = 17
+goldbach_11 = 11
+goldbach_12 = 3
+
+// Define Po3 levels based on opening of the day and week
+day_open = security(syminfo.tickerid, "D", open)
+week_open = security(syminfo.tickerid, "W", open)
+
+po3_1 = round(day_open / 9) * 9
+po3_2 = round(day_open / 27) * 27
+po3_3 = round(day_open / 81) * 81
+po3_4 = round(day_open / 243) * 243
+po3_5 = round(day_open / 729) * 729
+
+po3_week_1 = round(week_open / 9) * 9
+po3_week_2 = round(week_open / 27) * 27
+po3_week_3 = round(week_open / 81) * 81
+po3_week_4 = round(week_open / 243) * 243
+po3_week_5 = round(week_open / 729) * 729
+
+// Define Algo 1 up market
+algo1_high_low = goldbach_0
+algo1_order_block = goldbach_10
+
+algo1_up = close >= algo1_high_low and close < algo1_order_block ? 1 : 
+    close >= algo1_order_block ? 3 : 0
+
+// Define Algo 2 up market
+algo2_rejection_block = goldbach_2
+algo2_breaker = goldbach_4
+algo2_fvg = goldbach_6
+algo2_opposite_order_block = goldbach_8
+algo2_opposite_mitigation = goldbach_10
+algo2_liquidity_void = goldbach_12
+
+algo2_up = close < algo1_high_low ? 0 :
+    close >= algo1_high_low and close < algo2_rejection_block ? 2 :
+    close >= algo2_rejection_block and close < algo2_breaker ? 4 :
+    close >= algo2_breaker and close < algo2_fvg ? 6 :
+    close >= algo2_fvg and close < algo2_opposite_order_block ? 8 :
+    close >= algo2_opposite_order_block and close < algo2_opposite_mitigation ? 10 :
+    close >= algo2_opposite_mitigation and close < algo2_liquidity_void ? 12 :
+    close >= algo2_liquidity_void ? 13 : 0
+
+// Define Algo 1 down market
+algo1_down = close < algo1_high_low ? 1 :
+    close >= algo1_high_low and close < algo1_order_block ? 11 :
+    close >= algo1_order_block and close < algo1_high_low ? 9 :
+    close >= algo1_opposite_order_block and close < algo1_high_low ? 5 :
+    close >= algo1_opposite_mitigation and close < algo1_high
